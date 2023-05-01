@@ -6,5 +6,10 @@ const voteSchema = new mongoose.Schema({
     dj: String,
     album: String,
     teledysk: String,
-    wydarzenie: String
-})
+    wydarzenie: String,
+    impreza: String,
+    email: String,
+    confirmed: { type: Boolean, default: false },
+}, {timestamps: true});
+
+module.exports = mongoose.model('Votes', voteSchema)
