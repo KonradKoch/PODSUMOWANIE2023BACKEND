@@ -40,7 +40,7 @@ exports.saveVoteCard = async (request, response) => {
 
 exports.showVoteCards = async (request, response) => {
     const year = new Date().getFullYear() - 1;
-    VoteCard.find({year: year}, 'category year name image video').exec((error, result) => {
+    VoteCard.find({year: year}, 'category year name image video', {sort: {name: 1}}).exec((error, result) => {
         if(error) {
             response.json(error)
         } else {
