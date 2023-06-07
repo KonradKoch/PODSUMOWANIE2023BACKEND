@@ -48,3 +48,62 @@ exports.showVoteCards = async (request, response) => {
         }
     })
 };
+
+exports.showLastYearResults = async (request, response) => {
+  const year = new Date().getFullYear() - 1;
+  VoteCard.aggregate([
+    {
+      $sort: {
+        votes: -1
+      }
+    },
+    {
+      $group: {
+        _id: '$category',
+        voteCards: { $push: '$$ROOT' },
+        totalVotes: { $sum: '$votes' }
+      }
+    },
+    {
+      $project: {
+      
+        voteCards: {
+          $slice: ['$voteCards', 3]
+        },
+        totalVotes: 1
+      }
+    },
+    {
+      $project: {
+        category: 1,
+        data: {
+          $map: {
+            input: '$voteCards',
+            as: 'voteCard',
+            in: {
+              name: '$$voteCard.name',
+              votesPercentage: {
+                $round: [
+                  { $multiply: [
+                    { $divide: ['$$voteCard.votes', '$totalVotes'] },
+                    100
+                  ] },
+                  2
+                ]
+              },
+              image: '$$voteCard.image',
+              year: '$$voteCard.year',
+              video: '$$voteCard.video',
+            }
+          }
+        }
+      }
+    }
+  ]).exec((error, result) => {
+      if(error) {
+          response.json(error)
+      } else {
+          response.json(result);
+      }
+  })
+};
