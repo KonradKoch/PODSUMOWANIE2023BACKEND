@@ -33,6 +33,7 @@ exports.saveVote = async (request, response) => {
         response.status(404).send('Zapraszamy za rok!')
     } else {
         newVote.save().then( async () => {
+            const summaryYear = new Date().getFullYear() - 1
             const voteId = newVote._id
             const verificationLink = `${process.env.REACT_APP_API_DOMAIN}/verify-vote?id=${voteId}`;
             const mailOptions = {
@@ -40,7 +41,7 @@ exports.saveVote = async (request, response) => {
                 to: email,
                 subject: 'PODSUMOWANIE POZNANSKIRAP.COM - link weryfikacyjny',
                 html: `Witaj! <br/><br/>
-                Dziękujemy za Twój udział w akcji PODSUMOWANIE ROKU 2022 na poznańskiej scenie hip-hopowej.<br/>
+                Dziękujemy za Twój udział w akcji PODSUMOWANIE ROKU ${summaryYear} na poznańskiej scenie hip-hopowej.<br/>
                 Kliknij <a href="${verificationLink}">TUTAJ</a>, aby potwierdzić swój udział w głosowaniu.<br/>
                 Pamiętaj, że tylko potwierdzone głosy biorą udział w zabawie!<br/>
                 <br/>
