@@ -1,6 +1,6 @@
 exports.getOrCreateTimerEvent = async (request, response) => {
   // modify the timer counting time here:
-    const endDate = new Date('2024-04-08T23:59:59Z');
+    const endDate = new Date('2025-05-11T23:59:59Z');
 
 // Timer endpoint
 

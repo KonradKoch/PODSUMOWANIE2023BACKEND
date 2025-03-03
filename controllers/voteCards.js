@@ -55,57 +55,88 @@ exports.showVoteCards = async (request, response) => {
       }
     });
 };
-
 exports.showOldResults = async (request, response) => {
-  const year = new Date().getFullYear() - 1;
   VoteCard.aggregate([
-    { $match: VoteCard.find({year: {$ne: year}}).cast(VoteCard) },
     {
-      $sort: {
-        votes: -1,
-      },
+      $sort: { votes: -1 } // Sortujemy najpierw według liczby głosów malejąco
     },
     {
       $group: {
-        _id: "$category",
-        voteCards: { $push: "$$ROOT" },
-        totalVotes: { $sum: "$votes" },
+        _id: { category: "$category", year: "$year" }, // Grupujemy po kategorii i roku
+        bestVoteCard: { $first: "$$ROOT" }, // Wybieramy pierwszy (najlepszy) wpis
       },
     },
     {
       $project: {
-        voteCards: {
-          $slice: ["$voteCards", 3],
-        },
-        totalVotes: 1,
+        _id: 0,
+        category: "$_id.category",
+        year: "$_id.year",
+        name: "$bestVoteCard.name",
+        image: "$bestVoteCard.image",
+        video: "$bestVoteCard.video",
+
       },
     },
-    {
-      $project: {
-        category: 1,
-        data: {
-          $map: {
-            input: "$voteCards",
-            as: "voteCard",
-            in: {
-              name: "$$voteCard.name",
-              image: "$$voteCard.image",
-              year: "$$voteCard.year",
-              video: "$$voteCard.video",
-            },
-          },
-        },
-      },
-    },
+    { $sort: { year: -1, category: 1 } } // Sortowanie wyników według roku malejąco i kategorii rosnąco
   ]).exec((error, result) => {
     if (error) {
       response.json(error);
     } else {
       response.json(result);
-      console.log(response.data)
+      console.log(response.data);
     }
   });
 };
+// exports.showOldResults = async (request, response) => {
+//   const year = new Date().getFullYear() - 1;
+//   VoteCard.aggregate([
+//     { $match: VoteCard.find({year: {$ne: year}}).cast(VoteCard) },
+//     {
+//       $sort: {
+//         votes: -1,
+//       },
+//     },
+//     {
+//       $group: {
+//         _id: "$category",
+//         voteCards: { $push: "$$ROOT" },
+//         totalVotes: { $sum: "$votes" },
+//       },
+//     },
+//     {
+//       $project: {
+//         voteCards: {
+//           $slice: ["$voteCards", 3],
+//         },
+//         totalVotes: 1,
+//       },
+//     },
+//     {
+//       $project: {
+//         category: 1,
+//         data: {
+//           $map: {
+//             input: "$voteCards",
+//             as: "voteCard",
+//             in: {
+//               name: "$$voteCard.name",
+//               image: "$$voteCard.image",
+//               year: "$$voteCard.year",
+//               video: "$$voteCard.video",
+//             },
+//           },
+//         },
+//       },
+//     },
+//   ]).exec((error, result) => {
+//     if (error) {
+//       response.json(error);
+//     } else {
+//       response.json(result);
+//       console.log(response.data)
+//     }
+//   });
+// };
 
 
 exports.showVoteCards = async (request, response) => {
